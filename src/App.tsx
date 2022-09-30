@@ -45,16 +45,17 @@ function App(): JSX.Element {
     let newCandidateList = produce(candidateList, (draftCandidateList) => {
       type && draftCandidateList.push(type);
     });
+    setCandidateList(newCandidateList);
     newCandidateList = sanitizedCandidateList(newCandidateList);
-    if (isGameOver(newCandidateList.length)) {
-      setTimeout(() => {
-        Modal.warning({
+    setTimeout(() => {
+      if (isGameOver(newCandidateList.length)) {
+        return Modal.warning({
           content: "游戏结束",
         });
-      }, 300);
-    }
+      }
 
-    setCandidateList(newCandidateList);
+      setCandidateList(newCandidateList);
+    }, 300);
   }
 
   return (

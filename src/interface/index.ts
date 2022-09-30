@@ -1,6 +1,6 @@
-import { GoodsType } from "../constant";
+import { allRelativePositions, GoodsType } from "../constant";
 
-export type RelativePosition = 0 | 0.5 | -0.5;
+export type RelativePosition = typeof allRelativePositions[number];
 
 export interface CardItemType {
   type: GoodsType | undefined;
@@ -42,4 +42,7 @@ export interface RandomCardParams {
   layerIndex: number;
   rowIndex: number;
   columnIndex: number;
+
+  relativeX: RelativePosition;
+  relativeY: RelativePosition;
 }

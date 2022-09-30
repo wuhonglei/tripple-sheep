@@ -6,6 +6,7 @@ import styles from "./index.module.css";
 import classNames from "classnames";
 
 export interface Props {
+  title?: string;
   onClick?: () => void;
   isVisible?: boolean;
   type: GoodsType | undefined;
@@ -15,6 +16,7 @@ export interface Props {
 
 export default function CardItem(props: Props): JSX.Element {
   const {
+    title,
     type,
     isVisible = true,
     onClick,
@@ -27,6 +29,7 @@ export default function CardItem(props: Props): JSX.Element {
 
   return (
     <div
+      title={title}
       style={style}
       onClick={onClick}
       className={classNames(styles.container, outerClassName)}

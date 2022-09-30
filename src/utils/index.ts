@@ -1,32 +1,74 @@
-import { GoodsType, size } from "../constant";
+import {
+  allGoodsTypes,
+  allRelativePositions,
+  GoodsType,
+  size,
+} from "../constant";
 import {
   CardItemType,
   LayerData,
   RandomCardParams,
   RandomLayerListParams,
   RandomLayerParams,
+  RelativePosition,
 } from "../interface";
-import { countBy, sample } from "lodash-es";
+
+import { countBy, sample, cloneDeep, isUndefined } from "lodash-es";
+
+const { width, height } = size;
+
+export function isEmptyCard(type: GoodsType | undefined): type is undefined {
+  return type === undefined;
+}
+
+export function isEmptyOffset(offset: RelativePosition): boolean {
+  return offset === 0;
+}
 
 export function generateArray(len: number): Array<number> {
   return new Array(len).fill(0);
 }
 
+export function generateRelativePosition(): RelativePosition {
+  // 边缘节点
+  return sample(allRelativePositions) as RelativePosition;
+}
+
+export function getUpdatedCenterCard(
+  leftCard: CardItemType,
+  centerCard: CardItemType
+): CardItemType {
+  const {
+    type: leftType,
+    position: { relativeX: leftRelativeX },
+  } = leftCard;
+  centerCard.position.relativeX = 0; // 不偏移
+  centerCard.position.left = getAbsoluteLeft(
+    centerCard.position.relativeX,
+    centerCard.position.baseX
+  );
+  if (!isEmptyCard(leftType) && !isEmptyOffset(leftRelativeX)) {
+    centerCard.type = undefined;
+  }
+
+  return centerCard;
+}
+
+// 生成某一个 card
 export function generateRandomCard(params: RandomCardParams): CardItemType {
-  const { layerIndex, rowIndex, columnIndex } = params;
-  const { width, height } = size;
+  const { layerIndex, rowIndex, columnIndex, relativeX, relativeY } = params;
+
+  const baseX = columnIndex * width;
+  const baseY = rowIndex * height;
+
   return {
     type: sample([
+      ...allGoodsTypes,
       undefined,
-      GoodsType.Fire,
       undefined,
-      GoodsType.Glove,
       undefined,
-      GoodsType.Milk,
       undefined,
-      GoodsType.Sheer,
       undefined,
-      GoodsType.Wood,
       undefined,
     ]),
     isVisible: true,
@@ -36,31 +78,102 @@ export function generateRandomCard(params: RandomCardParams): CardItemType {
       columnIndex,
 
       // 基准坐标
-      baseX: columnIndex * width,
-      baseY: rowIndex * height,
+      baseX,
+      baseY,
 
       // 相对基准的偏移量
-      relativeX: 0,
-      relativeY: 0,
+      relativeX,
+      relativeY,
 
       // 相对父容器的绝对坐标
-      left: columnIndex * width,
-      top: rowIndex * height,
+      left: getAbsoluteLeft(relativeX, baseX),
+      top: getAbsoluteTop(relativeY, baseY),
     },
   };
 }
 
-export function generateRandomLayer(
-  params: RandomLayerParams
-): CardItemType[][] {
-  const { layerIndex, row, column } = params;
-  return generateArray(row).map((_value, rowIndex) =>
-    generateArray(column).map((_value, columnIndex) =>
-      generateRandomCard({ layerIndex, rowIndex, columnIndex })
-    )
-  );
+export function getAbsoluteLeft(
+  relativeX: RelativePosition,
+  baseX: number
+): number {
+  return baseX + relativeX * width;
 }
 
+export function getAbsoluteTop(
+  relativeY: RelativePosition,
+  baseY: number
+): number {
+  return baseY + relativeY * height;
+}
+
+export function generateMirrorCard(
+  columnIndex: number,
+  card: CardItemType
+): CardItemType {
+  const copiedCard = cloneDeep(card);
+  const {
+    type,
+    position: { relativeX },
+  } = copiedCard;
+  copiedCard.type = isUndefined(type) ? undefined : sample(allGoodsTypes);
+  copiedCard.position.columnIndex = columnIndex;
+  copiedCard.position.baseX = columnIndex * width;
+  copiedCard.position.relativeX = (-1 * relativeX) as RelativePosition;
+  copiedCard.position.left = getAbsoluteLeft(
+    copiedCard.position.relativeX,
+    copiedCard.position.baseX
+  );
+
+  return copiedCard;
+}
+
+// 生成某一层的 card list (二维数组)
+export function generateRandomLayer(params: RandomLayerParams): LayerData {
+  const { layerIndex, row, column } = params;
+  const centerIndex = column / 2;
+
+  const [layerRelativeX, layerRelativeY] = [
+    generateRelativePosition(),
+    generateRelativePosition(),
+  ];
+
+  return generateArray(row).reduce((rowCardList, _value, rowIndex) => {
+    const columnCardList = generateArray(column).reduce(
+      (columnCardList, _value, columnIndex) => {
+        let tempCard;
+        // 前半部分
+        if (columnIndex < centerIndex) {
+          tempCard = generateRandomCard({
+            layerIndex,
+            rowIndex,
+            columnIndex,
+            relativeX: layerRelativeX,
+            relativeY: layerRelativeY,
+          });
+          // 处理中间卡片
+          if (columnIndex === Math.floor(centerIndex)) {
+            tempCard = getUpdatedCenterCard(
+              columnCardList[columnIndex - 1],
+              tempCard
+            );
+          }
+        } else {
+          const preIndex = column - 1 - columnIndex;
+          const preCard = columnCardList[preIndex];
+          tempCard = generateMirrorCard(columnIndex, preCard);
+        }
+        columnCardList.push(tempCard);
+
+        return columnCardList;
+      },
+      [] as CardItemType[]
+    );
+    rowCardList.push(columnCardList);
+    return rowCardList;
+  }, [] as LayerData);
+}
+
+// 生成多层 card list
 export function generateRandomLayerList(
   params: RandomLayerListParams
 ): LayerData[] {

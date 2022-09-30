@@ -15,18 +15,32 @@ export default function MainGrid(props: Props) {
   return (
     <main className={styles.container}>
       <section className={styles.layer}>
-        {layerList.map((layer, zIndex) =>
-          layer
-            .flat()
-            .map((data, index) => (
+        {layerList.map((layer) =>
+          layer.flat().map((data) => {
+            const {
+              position: {
+                layerIndex,
+                rowIndex,
+                columnIndex,
+                left,
+                top,
+                relativeX,
+                relativeY,
+              },
+            } = data;
+            const key = `${layerIndex}:${rowIndex}/${columnIndex}:${relativeX}/${relativeY}`;
+
+            return (
               <CardItem
+                key={key}
+                title={key}
                 type={data.type}
                 className={styles.card}
-                key={`${zIndex}/${index}`}
                 onClick={() => onClick(data)}
-                style={{ zIndex, ...pick(data.position, ["left", "top"]) }}
+                style={{ zIndex: layerIndex, left, top }}
               />
-            ))
+            );
+          })
         )}
       </section>
     </main>

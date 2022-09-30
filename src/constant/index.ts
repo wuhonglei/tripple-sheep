@@ -12,6 +12,13 @@ export const enum GoodsType {
   Wood,
 }
 
+export const allGoodsTypes = [
+  GoodsType.Fire,
+  GoodsType.Glove,
+  GoodsType.Milk,
+  GoodsType.Wood,
+];
+
 export const goodUrlByType: Record<GoodsType, string> = {
   [GoodsType.Fire]: fire,
   [GoodsType.Glove]: glove,
@@ -30,3 +37,5 @@ export const size = {
   width: 44,
   height: 46,
 };
+
+export const allRelativePositions = [0, 0.5, -0.5] as const;

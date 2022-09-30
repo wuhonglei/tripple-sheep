@@ -31,12 +31,13 @@ export default function CardItem(props: Props): JSX.Element {
     <div
       title={title}
       style={style}
-      onClick={onClick}
       className={classNames(styles.container, outerClassName)}
     >
       <div
+        onClick={onClick}
         className={classNames(styles.card, {
           [styles["card-mask"]]: !isVisible,
+          [styles.invisible]: !isVisible,
         })}
       >
         <img

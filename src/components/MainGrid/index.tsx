@@ -2,7 +2,6 @@ import React from "react";
 import { CardItemType, LayerData } from "../../interface";
 import CardItem from "../CardItem";
 
-import { pick } from "lodash-es";
 import styles from "./index.module.css";
 
 export interface Props {
@@ -18,25 +17,19 @@ export default function MainGrid(props: Props) {
         {layerList.map((layer) =>
           layer.flat().map((data) => {
             const {
-              position: {
-                layerIndex,
-                rowIndex,
-                columnIndex,
-                left,
-                top,
-                relativeX,
-                relativeY,
-              },
+              key,
+              isVisible,
+              position: { layerIndex, left, top, relativeX, relativeY },
             } = data;
-            const key = `${layerIndex}:${rowIndex}/${columnIndex}:${relativeX}/${relativeY}`;
 
             return (
               <CardItem
                 key={key}
-                title={key}
                 type={data.type}
+                isVisible={isVisible}
                 className={styles.card}
                 onClick={() => onClick(data)}
+                title={`${key}:${relativeX}/${relativeY}`}
                 style={{ zIndex: layerIndex, left, top }}
               />
             );

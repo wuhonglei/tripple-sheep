@@ -26,7 +26,6 @@
 
 .card-mask::after {
   position: absolute;
-  cursor: default;
   content: "";
   left: 0;
   top: 0;
@@ -34,4 +33,9 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.3);
   z-index: 1;
+}
+
+.invisible {
+  cursor: default;
+  pointer-events: none;
 }

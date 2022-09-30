@@ -11,7 +11,10 @@ import {
 import { countBy, sample, cloneDeep, isUndefined } from "lodash-es";
 import {
   generateArray,
+  generateCardKey,
   generateRelativePosition,
+  getArrayRange,
+  hasCollapse,
   isAllowClear,
   isEmptyCard,
   isEmptyOffset,
@@ -45,6 +48,30 @@ export function generateRandomCard(params: RandomCardParams): CardItemType {
 
   const baseX = columnIndex * width;
   const baseY = rowIndex * height;
+  const left = getAbsoluteLeft(relativeX, baseX);
+  const top = getAbsoluteTop(relativeY, baseY);
+
+  const position = {
+    layerIndex,
+    rowIndex,
+    columnIndex,
+
+    // 基准坐标
+    baseX,
+    baseY,
+
+    // 相对基准的偏移量
+    relativeX,
+    relativeY,
+
+    // 相对父容器的绝对坐标
+    left,
+    top,
+
+    // 中心
+    centerX: left + width / 2,
+    centerY: top + height / 2,
+  };
 
   return {
     type: sample([
@@ -57,23 +84,8 @@ export function generateRandomCard(params: RandomCardParams): CardItemType {
       undefined,
     ]),
     isVisible: true,
-    position: {
-      layerIndex,
-      rowIndex,
-      columnIndex,
-
-      // 基准坐标
-      baseX,
-      baseY,
-
-      // 相对基准的偏移量
-      relativeX,
-      relativeY,
-
-      // 相对父容器的绝对坐标
-      left: getAbsoluteLeft(relativeX, baseX),
-      top: getAbsoluteTop(relativeY, baseY),
-    },
+    position,
+    key: generateCardKey(position),
   };
 }
 
@@ -108,6 +120,7 @@ export function generateMirrorCard(
     copiedCard.position.relativeX,
     copiedCard.position.baseX
   );
+  copiedCard.key = generateCardKey(copiedCard.position);
 
   return copiedCard;
 }
@@ -168,9 +181,59 @@ export function generateRandomLayerList(
   );
 }
 
+export function getInitialLayerList(
+  params: RandomLayerListParams
+): LayerData[] {
+  const layerList = generateRandomLayerList(params);
+  collapseDetect(layerList);
+  return layerList;
+}
+
 export function sanitizedCandidateList(
   candidateList: GoodsType[]
 ): GoodsType[] {
   const countMap = countBy(candidateList);
   return candidateList.filter((type) => !isAllowClear(countMap[type]));
+}
+
+function getDetectCardList(
+  currentCard: CardItemType,
+  layerList: LayerData[]
+): CardItemType[] {
+  const {
+    key: currentKey,
+    position: { layerIndex, rowIndex, columnIndex },
+  } = currentCard;
+  return (layerList.slice(layerIndex + 1) || [])
+    .map((layer) => {
+      const [rowMin, rowMax] = getArrayRange(rowIndex, layer.length);
+      const [columnMin, columnMax] = getArrayRange(
+        columnIndex,
+        layer[0].length
+      );
+      return layer
+        .slice(rowMin, rowMax)
+        .map((rowData) => rowData.slice(columnMin, columnMax));
+    })
+    .flat(3)
+    .filter(({ key, type }) => key !== currentKey && !isEmptyCard(type));
+}
+
+/**
+ * 每个 card 卡片可见性检测
+ */
+export function collapseDetect(layerList: LayerData[]): void {
+  layerList.flat(3).forEach((currentCard) => {
+    const { type } = currentCard;
+    if (isEmptyCard(type)) {
+      return;
+    }
+
+    // ① 获取检测范围
+    const cardList = getDetectCardList(currentCard, layerList);
+    // ② 检测是否重叠
+    currentCard.isVisible = cardList.every(
+      (card) => !hasCollapse(currentCard.position, card.position)
+    );
+  });
 }

@@ -3,6 +3,7 @@ import { allRelativePositions, GoodsType } from "../constant";
 export type RelativePosition = typeof allRelativePositions[number];
 
 export interface CardItemType {
+  key: string;
   type: GoodsType | undefined;
   isVisible: boolean;
   position: {
@@ -22,6 +23,10 @@ export interface CardItemType {
     // 相对父容器的绝对坐标
     left: number;
     top: number;
+
+    // 中心
+    centerX: number;
+    centerY: number;
   };
 }
 

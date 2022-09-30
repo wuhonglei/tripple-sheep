@@ -58,6 +58,7 @@ function App(): JSX.Element {
       } else if (isGameSuccess(layerList.length)) {
         return Modal.success({
           content: "闯关成功",
+          onOk: () => window.location.reload(),
         });
       }
       setCandidateList(newCandidateList);

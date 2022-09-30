@@ -120,6 +120,7 @@ export function generateMirrorCard(
     copiedCard.position.relativeX,
     copiedCard.position.baseX
   );
+  copiedCard.position.centerX = copiedCard.position.left + width / 2;
   copiedCard.key = generateCardKey(copiedCard.position);
 
   return copiedCard;

@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+}
+
+.layer {
+  margin: auto;
+  position: relative;
+  height: 276px;
+  width: 308px;
+
+  display: grid;
+  /* 6 行；7 列 */
+  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+}
+
+.card {
+  position: absolute;
+}

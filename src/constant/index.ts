@@ -28,7 +28,7 @@ export const goodUrlByType: Record<GoodsType, string> = {
 };
 
 export const grid = {
-  layer: 1,
+  layer: 2,
   row: 6,
   column: 7,
 };

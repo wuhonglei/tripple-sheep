@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { Modal } from "antd";
 import MusicBackground from "./components/MusicBackground";
@@ -27,8 +27,12 @@ function App(): JSX.Element {
     getInitialLayerList(grid)
   );
   const [candidateList, setCandidateList] = useState<GoodsType[]>([]);
+  const timerRef = useRef<NodeJS.Timeout>();
+  const newlyCandidateList = useRef<GoodsType[]>(candidateList);
 
   function handleClick(data: CardItemType): void {
+    window.clearTimeout(timerRef.current);
+
     const {
       type,
       position: { layerIndex, rowIndex, columnIndex },
@@ -43,25 +47,32 @@ function App(): JSX.Element {
     collapseDetect(newLayerList);
     setLayerList(newLayerList);
 
-    // 计算是否可消除
-    let newCandidateList = produce(candidateList, (draftCandidateList) => {
-      type && draftCandidateList.push(type);
-    });
-    setCandidateList(newCandidateList);
-    newCandidateList = sanitizedCandidateList(newCandidateList);
-    setTimeout(() => {
-      if (isGameOver(newCandidateList.length)) {
-        return Modal.warning({
-          content: "游戏结束",
-          onOk: () => window.location.reload(),
-        });
-      } else if (isGameSuccess(layerList.length)) {
-        return Modal.success({
-          content: "闯关成功",
-          onOk: () => window.location.reload(),
-        });
+    let newCandidateList = produce(
+      newlyCandidateList.current,
+      (draftCandidateList) => {
+        type && draftCandidateList.push(type);
       }
-      setCandidateList(newCandidateList);
+    );
+    // 计算是否可消除
+    setCandidateList(newCandidateList);
+    newlyCandidateList.current = sanitizedCandidateList(newCandidateList);
+
+    if (isGameOver(newlyCandidateList.current.length)) {
+      Modal.warning({
+        content: "游戏结束",
+        onOk: () => window.location.reload(),
+      });
+      return;
+    } else if (isGameSuccess(layerList.length)) {
+      Modal.success({
+        content: "闯关成功",
+        onOk: () => window.location.reload(),
+      });
+      return;
+    }
+
+    timerRef.current = setTimeout(() => {
+      setCandidateList(newlyCandidateList.current);
     }, 300);
   }
 

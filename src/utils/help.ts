@@ -11,8 +11,11 @@ export function isEmptyOffset(offset: RelativePosition): boolean {
   return offset === 0;
 }
 
-export function generateArray(len: number): Array<number> {
-  return new Array(len).fill(0);
+export function generateArray(
+  len: number,
+  value: any = undefined
+): Array<number> {
+  return new Array(len).fill(value);
 }
 
 export function generateRelativePosition(): RelativePosition {
@@ -64,4 +67,18 @@ export function hasCollapse(
   const distanceY = Math.abs(positionA.centerY - positionB.centerY);
 
   return distanceX < width && distanceY < height;
+}
+
+export function generateCardWithDensity(
+  density: number,
+  itemList: any[]
+): any | undefined {
+  const undefinedLen =
+    density === 1 ? 0 : ((1 - density) * itemList.length) / density;
+  const item = sample([
+    ...itemList,
+    ...generateArray(Math.floor(undefinedLen), undefined),
+  ]);
+
+  return item;
 }

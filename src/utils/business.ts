@@ -1,4 +1,4 @@
-import { allGoodsTypes, GoodsType, size } from "../constant";
+import { allGoodsTypes, GoodsType, grid, size } from "../constant";
 import {
   CardItemType,
   LayerData,
@@ -12,6 +12,7 @@ import { countBy, sample, cloneDeep, isUndefined } from "lodash-es";
 import {
   generateArray,
   generateCardKey,
+  generateCardWithDensity,
   generateRelativePosition,
   getArrayRange,
   hasCollapse,
@@ -35,6 +36,7 @@ export function getUpdatedCenterCard(
     centerCard.position.relativeX,
     centerCard.position.baseX
   );
+  centerCard.position.centerX = centerCard.position.left + width / 2;
   if (!isEmptyCard(leftType) && !isEmptyOffset(leftRelativeX)) {
     centerCard.type = undefined;
   }
@@ -74,15 +76,7 @@ export function generateRandomCard(params: RandomCardParams): CardItemType {
   };
 
   return {
-    type: sample([
-      ...allGoodsTypes,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    ]),
+    type: generateCardWithDensity(grid.density, allGoodsTypes),
     isVisible: true,
     position,
     key: generateCardKey(position),

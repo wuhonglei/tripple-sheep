@@ -37,6 +37,10 @@ export function isGameOver(count: number): boolean {
   return count === 7;
 }
 
+export function getValidCardFromLayer(layerList: LayerData[]): CardItemType[] {
+  return layerList.flat(3).filter(({ type }) => !isEmptyCard(type));
+}
+
 export function isGameSuccess(
   layerList: LayerData[],
   assistCardList: AssistCard

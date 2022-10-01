@@ -24,6 +24,7 @@ import {
   generateCardWithDensity,
   generateRelativePosition,
   getArrayRange,
+  getValidCardFromLayer,
   hasCollapse,
   isAllowClear,
   isEmptyCard,
@@ -31,6 +32,10 @@ import {
 } from "./help";
 
 const { width, height } = size;
+const {
+  assist: { left, center, right },
+} = grid;
+const totalAssist = left + center + right;
 
 export function getUpdatedCenterCard(
   leftCard: CardItemType,
@@ -190,10 +195,7 @@ export function generateRandomLayerList(
  * 要求的 card 隐藏
  */
 export function reSortLayerList(layerList: LayerData[]): void {
-  const cardListByType = groupBy(
-    layerList.flat(3).filter((card) => !isEmptyCard(card.type)),
-    "type"
-  );
+  const cardListByType = groupBy(getValidCardFromLayer(layerList), "type");
   Object.values(cardListByType).forEach((sameTypeList) => {
     const len = sameTypeList.length;
     sampleSize(sameTypeList, len % 3).forEach(
@@ -210,44 +212,49 @@ export function getInitialLayerList(
   return layerList;
 }
 
-export function getAssistCard(layerList: LayerData[]): AssistCard {
+export function getAssistCard(layerList: LayerData[]): GoodsType[] {
   const cardList = [] as GoodsType[];
-  const cardListByType = groupBy(
-    layerList.flat(3).filter((card) => !isEmptyCard(card.type)),
-    "type"
-  );
+  const cardListByType = groupBy(getValidCardFromLayer(layerList), "type");
   Object.entries(cardListByType).forEach(([type, sameTypeList]) => {
+    const cardType = Number(type);
     const len = sameTypeList.length;
     const lackLen = len % 3 === 0 ? 0 : 3 - (len % 3);
-
-    cardList.push(...generateArray(lackLen, type));
+    cardList.push(...generateArray(lackLen, cardType));
   });
 
   // 补充后，辅助槽还有剩余空间
-  const {
-    assist: { left, center, right },
-  } = grid;
-  const totalAssist = left + center + right;
   const availableLen = totalAssist - cardList.length;
-  const diffTypes = Math.ceil(availableLen / 3);
+  const diffTypes = Math.floor(availableLen / 3);
   cardList.push(
     ...sampleSize(allGoodsTypes, diffTypes)
       .map((type) => generateArray(3, type))
       .flat(2)
   );
-  const newList = shuffle(cardList.slice(0, totalAssist));
-  return {
-    left: newList.slice(0, left),
-    center: newList.slice(left, left + center),
-    right: newList.slice(left + center, left + center + right),
-  };
+  return cardList;
 }
 
 export function getInitialCardList(
   params: RandomLayerListParams
 ): [LayerData[], AssistCard] {
   const layerList = getInitialLayerList(params);
-  const assistCard = getAssistCard(layerList);
+  const assistList = getAssistCard(layerList);
+
+  // 补充了特定数量的类型元素后，仍有空余
+  const availableLen = totalAssist - assistList.length;
+  sampleSize(getValidCardFromLayer(layerList), availableLen).forEach((card) => {
+    const { type } = card;
+    assistList.push(type as GoodsType);
+    card.type = undefined;
+    card.isVisible = false;
+  });
+
+  const newList = shuffle(assistList);
+  const assistCard = {
+    left: newList.slice(0, left),
+    center: newList.slice(left, left + center),
+    right: newList.slice(left + center, left + center + right),
+  };
+
   return [layerList, assistCard];
 }
 

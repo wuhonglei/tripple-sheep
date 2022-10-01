@@ -65,7 +65,7 @@ function App(): JSX.Element {
     }, 300);
   }
 
-  console.info("layerList-1", layerList);
+  console.info("layerList-2", layerList);
 
   return (
     <MusicBackground className={styles.container}>

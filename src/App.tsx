@@ -1,17 +1,18 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import { Modal } from "antd";
 import MusicBackground from "./components/MusicBackground";
 import SlotCandidate from "./components/SlotCandidate";
 import MainGrid from "./components/MainGrid";
+import AssistGrid from "./components/AssistGrid";
 
 import { GoodsType, grid } from "./constant";
-import { CardItemType, LayerData } from "./interface";
+import { AssistCard, CardItemType, LayerData } from "./interface";
 
 import produce from "immer";
 import {
   collapseDetect,
-  getInitialLayerList,
+  getInitialCardList,
   isGameOver,
   isGameSuccess,
   sanitizedCandidateList,
@@ -22,10 +23,15 @@ import styles from "./app.module.css";
 import { cloneDeep } from "lodash-es";
 
 function App(): JSX.Element {
-  // 三维数组
-  const [layerList, setLayerList] = useState<LayerData[]>(() =>
-    getInitialLayerList(grid)
+  const [initialLayerList, initialAssistCard] = useMemo(
+    () => getInitialCardList(grid),
+    []
   );
+
+  // 三维数组
+  const [layerList, setLayerList] = useState<LayerData[]>(initialLayerList);
+  const [assistCardList, setAssistCardList] =
+    useState<AssistCard>(initialAssistCard);
   const [candidateList, setCandidateList] = useState<GoodsType[]>([]);
   const timerRef = useRef<NodeJS.Timeout>();
   const newlyCandidateList = useRef<GoodsType[]>(candidateList);
@@ -47,6 +53,14 @@ function App(): JSX.Element {
     collapseDetect(newLayerList);
     setLayerList(newLayerList);
 
+    updateCandidateList(type, newLayerList, assistCardList);
+  }
+
+  function updateCandidateList(
+    type: GoodsType | undefined,
+    layerList: LayerData[],
+    assistCardList: AssistCard
+  ): void {
     let newCandidateList = produce(
       newlyCandidateList.current,
       (draftCandidateList) => {
@@ -63,7 +77,7 @@ function App(): JSX.Element {
         onOk: () => window.location.reload(),
       });
       return;
-    } else if (isGameSuccess(newLayerList)) {
+    } else if (isGameSuccess(layerList, assistCardList)) {
       Modal.success({
         content: "闯关成功",
         onOk: () => window.location.reload(),
@@ -76,11 +90,27 @@ function App(): JSX.Element {
     }, 300);
   }
 
+  function handleAssistClick(direction: keyof AssistCard): void {
+    let type;
+    const newAssistCardList = produce(assistCardList, (draftAssistCardList) => {
+      type = draftAssistCardList[direction].pop();
+    });
+    setAssistCardList(newAssistCardList);
+    updateCandidateList(type, layerList, newAssistCardList);
+  }
+
   console.info("layerList-3", layerList);
 
   return (
     <MusicBackground className={styles.container}>
-      <MainGrid layerList={layerList} onClick={handleClick} />
+      <div className="flex flex-col gap-4">
+        <MainGrid
+          layerList={layerList}
+          onClick={handleClick}
+          className="flex-1 h-0"
+        />
+        <AssistGrid data={assistCardList} onClick={handleAssistClick} />
+      </div>
       <SlotCandidate data={candidateList} />
     </MusicBackground>
   );

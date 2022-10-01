@@ -1,7 +1,12 @@
 import { allRelativePositions, GoodsType, size } from "../constant";
-import { CardItemType, LayerData, RelativePosition } from "../interface";
+import {
+  AssistCard,
+  CardItemType,
+  LayerData,
+  RelativePosition,
+} from "../interface";
 
-import { sample } from "lodash-es";
+import { isEmpty, sample } from "lodash-es";
 
 export function isEmptyCard(type: GoodsType | undefined): type is undefined {
   return type === undefined;
@@ -32,8 +37,14 @@ export function isGameOver(count: number): boolean {
   return count === 7;
 }
 
-export function isGameSuccess(layerList: LayerData[]): boolean {
-  return layerList.flat(3).every(({ type }) => isEmptyCard(type));
+export function isGameSuccess(
+  layerList: LayerData[],
+  assistCardList: AssistCard
+): boolean {
+  return (
+    layerList.flat(3).every(({ type }) => isEmptyCard(type)) &&
+    Object.values(assistCardList).every((typeList) => isEmpty(typeList))
+  );
 }
 
 export function getArrayRange(index: number, len: number): [number, number] {

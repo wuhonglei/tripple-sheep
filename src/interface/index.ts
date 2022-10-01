@@ -1,4 +1,4 @@
-import { allRelativePositions, GoodsType } from "../constant";
+import { allRelativePositions, Direction, GoodsType } from "../constant";
 
 export type RelativePosition = typeof allRelativePositions[number];
 
@@ -51,3 +51,9 @@ export interface RandomCardParams {
   relativeX: RelativePosition;
   relativeY: RelativePosition;
 }
+
+export type AssistCard = {
+  left: GoodsType[];
+  center: GoodsType[];
+  right: GoodsType[];
+};

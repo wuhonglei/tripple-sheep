@@ -48,10 +48,15 @@ export const goodUrlByType: Record<GoodsType, string> = {
 };
 
 export const grid = {
-  density: 0.8,
+  density: 0.6,
   layer: 4,
   row: 6,
   column: 7,
+  assist: {
+    left: 12,
+    center: 6,
+    right: 12,
+  },
 };
 
 export const size = {

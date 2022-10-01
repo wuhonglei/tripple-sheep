@@ -1,0 +1,24 @@
+.container {
+  height: 80px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.left,
+.right,
+.center {
+  position: relative;
+}
+
+.left-card-item,
+.right-card-item {
+  position: absolute;
+  top: 0;
+}
+
+.center {
+  width: 42px;
+}
+.center-card-item {
+  position: absolute;
+}

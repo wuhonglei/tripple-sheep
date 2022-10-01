@@ -8,7 +8,14 @@ import {
   RelativePosition,
 } from "../interface";
 
-import { countBy, sample, cloneDeep, isUndefined } from "lodash-es";
+import {
+  countBy,
+  sample,
+  cloneDeep,
+  isUndefined,
+  groupBy,
+  sampleSize,
+} from "lodash-es";
 import {
   generateArray,
   generateCardKey,
@@ -176,10 +183,28 @@ export function generateRandomLayerList(
   );
 }
 
+/**
+ * 对于生成的多层级 card，每种类型 card 的数量可能不满足 3 的整数倍，因此需要将不符合
+ * 要求的 card 隐藏
+ */
+export function reSortLayerList(layerList: LayerData[]): void {
+  const cardListByType = groupBy(
+    layerList.flat(3).filter((card) => !isEmptyCard(card.type)),
+    "type"
+  );
+  Object.values(cardListByType).forEach((sameTypeList) => {
+    const len = sameTypeList.length;
+    sampleSize(sameTypeList, len % 3).forEach(
+      (card) => (card.type = undefined)
+    );
+  });
+}
+
 export function getInitialLayerList(
   params: RandomLayerListParams
 ): LayerData[] {
   const layerList = generateRandomLayerList(params);
+  reSortLayerList(layerList);
   collapseDetect(layerList);
   return layerList;
 }

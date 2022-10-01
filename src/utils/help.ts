@@ -1,5 +1,5 @@
 import { allRelativePositions, GoodsType, size } from "../constant";
-import { CardItemType, RelativePosition } from "../interface";
+import { CardItemType, LayerData, RelativePosition } from "../interface";
 
 import { sample } from "lodash-es";
 
@@ -25,15 +25,15 @@ export function generateRelativePosition(): RelativePosition {
 
 // 某类型物品数量是否允许消除
 export function isAllowClear(count: number): boolean {
-  return count >= 3;
+  return count === 3;
 }
 
 export function isGameOver(count: number): boolean {
-  return count >= 7;
+  return count === 7;
 }
 
-export function isGameSuccess(count: number): boolean {
-  return count <= 0;
+export function isGameSuccess(layerList: LayerData[]): boolean {
+  return layerList.flat(3).every(({ type }) => isEmptyCard(type));
 }
 
 export function getArrayRange(index: number, len: number): [number, number] {

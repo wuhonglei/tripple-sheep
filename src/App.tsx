@@ -63,7 +63,7 @@ function App(): JSX.Element {
         onOk: () => window.location.reload(),
       });
       return;
-    } else if (isGameSuccess(layerList.length)) {
+    } else if (isGameSuccess(newLayerList)) {
       Modal.success({
         content: "闯关成功",
         onOk: () => window.location.reload(),

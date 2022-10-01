@@ -1,9 +1,8 @@
 .container {
   margin: auto;
-  margin-top: 25px;
 
   width: 375px;
-  height: 667px;
+  height: 100vh;
   background-color: rgb(194, 252, 139);
 
   background-size: contain;

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { LegacyRef, ReactNode, useEffect, useRef } from "react";
 
 import musicBg from "../../assets/music/music_bg.mp3";
 
@@ -12,14 +12,25 @@ export interface Props {
 
 export default function MusicBackground(props: Props): JSX.Element {
   const { children, className: outerClassName } = props;
-  const musicRef = useRef(new Audio(musicBg));
+  const musicRef = useRef<HTMLAudioElement>();
 
   return (
-    <div
-      className={classNames(styles.container, outerClassName)}
-      onClick={(): any => musicRef.current.play()}
-    >
-      {children}
-    </div>
+    <>
+      <div
+        className={classNames(styles.container, outerClassName)}
+        onClick={() => musicRef.current?.play()}
+      >
+        {children}
+      </div>
+      <audio
+        loop
+        autoPlay
+        controls
+        ref={musicRef as any}
+        className={styles.audio}
+      >
+        <source src={musicBg} type="audio/wav" />
+      </audio>
+    </>
   );
 }

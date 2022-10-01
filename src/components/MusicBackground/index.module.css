@@ -10,3 +10,7 @@
   background-repeat: no-repeat;
   background-image: url("./image/bg.png");
 }
+
+.audio {
+  display: none;
+}

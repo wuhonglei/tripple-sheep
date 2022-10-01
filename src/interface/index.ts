@@ -1,4 +1,4 @@
-import { allRelativePositions, Direction, GoodsType } from "../constant";
+import { allRelativePositions, GoodsType } from "../constant";
 
 export type RelativePosition = typeof allRelativePositions[number];
 

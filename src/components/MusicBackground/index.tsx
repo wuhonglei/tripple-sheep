@@ -1,4 +1,4 @@
-import { LegacyRef, ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useRef } from "react";
 
 import musicBg from "../../assets/music/music_bg.mp3";
 

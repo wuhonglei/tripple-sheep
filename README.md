@@ -5,7 +5,7 @@
 ### 介绍
 
 模仿手机微信端的 `羊了个羊` 游戏
-![game|200](./screenshots//game.png)
+![game|200](./screenshots/game.png)
 
 ### 功能
 

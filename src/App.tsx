@@ -9,6 +9,7 @@ import AssistGrid from "./components/AssistGrid";
 import { GoodsType, grid } from "./constant";
 import { AssistCard, CardItemType, LayerData } from "./interface";
 
+import { cloneDeep } from "lodash-es";
 import produce from "immer";
 import {
   collapseDetect,
@@ -20,7 +21,6 @@ import {
 
 import "antd/dist/antd.css";
 import styles from "./app.module.css";
-import { cloneDeep } from "lodash-es";
 
 function App(): JSX.Element {
   const [initialLayerList, initialAssistCard] = useMemo(
@@ -33,7 +33,7 @@ function App(): JSX.Element {
   const [assistCardList, setAssistCardList] =
     useState<AssistCard>(initialAssistCard);
   const [candidateList, setCandidateList] = useState<GoodsType[]>([]);
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<number>();
   const newlyCandidateList = useRef<GoodsType[]>(candidateList);
 
   function handleClick(data: CardItemType): void {
@@ -85,7 +85,7 @@ function App(): JSX.Element {
       return;
     }
 
-    timerRef.current = setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       setCandidateList(newlyCandidateList.current);
     }, 300);
   }
